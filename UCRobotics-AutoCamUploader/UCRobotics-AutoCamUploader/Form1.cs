@@ -16,6 +16,7 @@ using AForge.Video.DirectShow;
 using Google.Apis.Services;
 using Google.Apis.YouTube.v3.Data;
 using Google.Apis.Upload;
+using System.IO.Ports;
 
 namespace UCRobotics_AutoCamUploader
 {
@@ -25,12 +26,85 @@ namespace UCRobotics_AutoCamUploader
         VideoFileWriter FileWriter;
         YouTubeService youtubeService;
         VideoCaptureDevice device;
+        SerialPort port;
+        bool validPort = false;
+        bool ready = false;
         bool recording = false;
+
 
         public Form1()
         {
             InitializeComponent();
             FileWriter = new VideoFileWriter();
+            updatePortList();
+        }
+
+        private void updatePortList()
+        {
+            var selected = portSelect.SelectedItem;
+            var newList = SerialPort.GetPortNames();
+            if(newList.Where((item) => !portSelect.Items.Contains(item)).Count() != 0 || newList.Length != portSelect.Items.Count || !newList.Contains(selected))
+            {
+                portSelect.Items.Clear();
+                portSelect.Items.AddRange(newList);
+                if(selected?.GetType() == typeof(string) && newList.Contains(selected))
+                {
+                    portSelect.SelectedItem = selected;
+                }
+                else
+                {
+                    portSelect.SelectedIndex = 0;
+                }
+            }
+            port = new SerialPort((string)portSelect.SelectedItem);
+        }
+
+        public async Task checkPort()
+        {
+            try
+            {
+                validPort = false;
+                port.Open();
+                port.ReadTimeout = 100;
+                port.WriteTimeout = 100;
+                port.WriteLine("ack");
+                string result = port.ReadLine();
+                if (result != "acked")
+                {
+                    port.Close();
+                    return;
+                }
+                port.WriteLine("id");
+                result = port.ReadLine();
+                if (result != "UCRoboticsFieldController")
+                {
+                    port.Close();
+                    return;
+                }
+                port.Close();
+                validPort = true;
+            }
+            catch(Exception)
+            {
+                port.Close();
+                validPort = false;
+                return;
+            }
+        }
+
+        private void updateReady()
+        {
+            serialIndicator.Checked = validPort;
+            youtubeIndicator.Checked = youtubeService != null;
+            camIndicator.Checked = device != null;
+            if(serialIndicator.Checked && youtubeIndicator.Checked && camIndicator.Checked)
+            {
+                indicatorPanel.BackColor = Color.Green;
+            }
+            else
+            {
+                indicatorPanel.BackColor = Color.Red;
+            }
         }
 
         private async void btnLogin_Click(object sender, EventArgs e)
@@ -48,18 +122,12 @@ namespace UCRobotics_AutoCamUploader
                 HttpClientInitializer = Credential,
                 ApplicationName = "UC Robotics Auto Uploader"
             });
-            if (device != null)
-            {
-
-            btnUpload.Enabled = true;
-            }
+            updateReady();
         }
 
         private void btnUpload_Click(object sender, EventArgs e)
         {
             FileWriter.Open("Test.mp4", device.VideoResolution.FrameSize.Width, device.VideoResolution.FrameSize.Height);
-            btnUpload.Enabled = false;
-            btnStop.Enabled = true;
             recording = true;
         }
 
@@ -69,17 +137,11 @@ namespace UCRobotics_AutoCamUploader
             {
                 FileWriter.WriteVideoFrame(eventArgs.Frame);
             }
-            if(display.Image != null)
-            {
-                display.Image.Dispose();
-            }
             display.Image = new Bitmap(eventArgs.Frame);
-            eventArgs.Frame.Dispose();
         }
 
         private async void btnStop_Click(object sender, EventArgs e)
         {
-            btnStop.Enabled = false;
             recording = false;
             await Task.Delay(500);
             FileWriter.Close();
@@ -100,7 +162,6 @@ namespace UCRobotics_AutoCamUploader
 
                 await videosInsertRequest.UploadAsync();
             }
-            btnUpload.Enabled = true;
         }
 
         private void btnCamSetup_Click(object sender, EventArgs e)
@@ -114,10 +175,40 @@ namespace UCRobotics_AutoCamUploader
             device = dialog.VideoDevice;
             device.NewFrame += Device_NewFrame;
             device.Start();
-            if(youtubeService != null)
+            updateReady();
+        }
+
+        private void autoSelect_CheckedChanged(object sender, EventArgs e)
+        {
+            portSelect.Enabled = !autoSelect.Checked;
+        }
+
+        private async void refreshPortsTimer_Tick(object sender, EventArgs e)
+        {
+            refreshPortsTimer.Enabled = false;
+            
+            updatePortList();
+            await checkPort();
+            if(autoSelect.Checked && !validPort)
             {
-                btnUpload.Enabled = true;
+                if(portSelect.SelectedIndex == portSelect.Items.Count - 1)
+                {
+                    portSelect.SelectedIndex = 0;
+                }
+                else
+                {
+                    portSelect.SelectedIndex += 1;
+                }
             }
+
+            updateReady();
+            refreshPortsTimer.Enabled = true;
+        }
+        
+
+        private void portSelect_SelectionChangeCommitted(object sender, EventArgs e)
+        {
+            port = new SerialPort((string)portSelect.SelectedItem);
         }
     }
 }
