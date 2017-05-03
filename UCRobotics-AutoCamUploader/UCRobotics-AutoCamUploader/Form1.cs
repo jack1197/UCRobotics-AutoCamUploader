@@ -25,6 +25,7 @@ namespace UCRobotics_AutoCamUploader
         VideoFileWriter FileWriter;
         YouTubeService youtubeService;
         VideoCaptureDevice device;
+        bool recording = false;
 
         public Form1()
         {
@@ -47,37 +48,40 @@ namespace UCRobotics_AutoCamUploader
                 HttpClientInitializer = Credential,
                 ApplicationName = "UC Robotics Auto Uploader"
             });
+            if (device != null)
+            {
 
             btnUpload.Enabled = true;
+            }
         }
 
         private void btnUpload_Click(object sender, EventArgs e)
         {
-            VideoCaptureDeviceForm dialog = new VideoCaptureDeviceForm();
-            DialogResult res = dialog.ShowDialog();
-            if (res != DialogResult.OK)
-            {
-                return;
-            }
-            device = dialog.VideoDevice;
-            device.NewFrame += Device_NewFrame;
             FileWriter.Open("Test.mp4", device.VideoResolution.FrameSize.Width, device.VideoResolution.FrameSize.Height);
-            device.Start();
             btnUpload.Enabled = false;
             btnStop.Enabled = true;
+            recording = true;
         }
 
         private void Device_NewFrame(object sender, AForge.Video.NewFrameEventArgs eventArgs)
         {
-            FileWriter.WriteVideoFrame(eventArgs.Frame);
-            display.BackgroundImage = new Bitmap(eventArgs.Frame);
+            if (recording)
+            {
+                FileWriter.WriteVideoFrame(eventArgs.Frame);
+            }
+            if(display.Image != null)
+            {
+                display.Image.Dispose();
+            }
+            display.Image = new Bitmap(eventArgs.Frame);
+            eventArgs.Frame.Dispose();
         }
 
         private async void btnStop_Click(object sender, EventArgs e)
         {
             btnStop.Enabled = false;
-            device.Stop();
-            device.NewFrame -= Device_NewFrame;
+            recording = false;
+            await Task.Delay(500);
             FileWriter.Close();
 
             var video = new Video();
@@ -97,6 +101,23 @@ namespace UCRobotics_AutoCamUploader
                 await videosInsertRequest.UploadAsync();
             }
             btnUpload.Enabled = true;
+        }
+
+        private void btnCamSetup_Click(object sender, EventArgs e)
+        {
+            VideoCaptureDeviceForm dialog = new VideoCaptureDeviceForm();
+            DialogResult res = dialog.ShowDialog();
+            if (res != DialogResult.OK)
+            {
+                return;
+            }
+            device = dialog.VideoDevice;
+            device.NewFrame += Device_NewFrame;
+            device.Start();
+            if(youtubeService != null)
+            {
+                btnUpload.Enabled = true;
+            }
         }
     }
 }
