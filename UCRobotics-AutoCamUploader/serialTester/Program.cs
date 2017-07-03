@@ -9,6 +9,8 @@ namespace serialTester
 {
     class Program
     {
+        static bool active = false;
+        static bool closing = false;
         static void Main(string[] args)
         {
             var ports = SerialPort.GetPortNames();
@@ -23,16 +25,32 @@ namespace serialTester
                 Console.WriteLine("\nSelect port by number: ");
                 var input = Console.ReadLine();
                 int number;
-                if(int.TryParse(input, out number))
+                if (int.TryParse(input, out number))
                 {
                     port = new SerialPort(ports[number]);
                     break;
                 }
                 Console.WriteLine("Invalid port!");
             }
-            port.Open();
-            while(true)
+            while (true)
             {
+                try
+                {
+                    port.Open();
+                    break;
+                }
+                catch
+                {
+                    Task.Delay(100).Wait();
+                }
+            }
+            Task.Run(consoleWatcher);
+            while (true)
+            {
+                if (closing)
+                {
+                    break;
+                }
                 if (port.BytesToRead == 0)
                 {
                     Task.Delay(500).Wait();
@@ -49,10 +67,35 @@ namespace serialTester
                             port.WriteLine("UCRoboticsFieldController");
                             break;
                         case "status":
-                            port.WriteLine("norec");
+                            port.WriteLine(active ? "rec" : "norec");
                             break;
                     }
 
+                }
+            }
+        }
+
+        static async Task consoleWatcher()
+        {
+            while (true)
+            {
+                Console.WriteLine("Enter input (0 = set to stopped, 1 = set to started, 2 = exit):");
+                string input = Console.ReadLine();
+                switch (input)
+                {
+                    case "0":
+                        active = false;
+                        break;
+                    case "1":
+                        active = true;
+                        break;
+                    case "2":
+                        closing = true;
+                        break;
+                }
+                if (closing)
+                {
+                    break;
                 }
             }
         }

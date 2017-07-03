@@ -45,10 +45,9 @@
             // 
             // btnLogin
             // 
-            this.btnLogin.Location = new System.Drawing.Point(11, 11);
-            this.btnLogin.Margin = new System.Windows.Forms.Padding(2);
+            this.btnLogin.Location = new System.Drawing.Point(16, 17);
             this.btnLogin.Name = "btnLogin";
-            this.btnLogin.Size = new System.Drawing.Size(53, 26);
+            this.btnLogin.Size = new System.Drawing.Size(80, 40);
             this.btnLogin.TabIndex = 0;
             this.btnLogin.Text = "Login";
             this.btnLogin.UseVisualStyleBackColor = true;
@@ -56,10 +55,9 @@
             // 
             // btnCamSetup
             // 
-            this.btnCamSetup.Location = new System.Drawing.Point(68, 11);
-            this.btnCamSetup.Margin = new System.Windows.Forms.Padding(2);
+            this.btnCamSetup.Location = new System.Drawing.Point(102, 17);
             this.btnCamSetup.Name = "btnCamSetup";
-            this.btnCamSetup.Size = new System.Drawing.Size(84, 26);
+            this.btnCamSetup.Size = new System.Drawing.Size(126, 40);
             this.btnCamSetup.TabIndex = 4;
             this.btnCamSetup.Text = "Setup Camera";
             this.btnCamSetup.UseVisualStyleBackColor = true;
@@ -67,10 +65,9 @@
             // 
             // display
             // 
-            this.display.Location = new System.Drawing.Point(11, 71);
-            this.display.Margin = new System.Windows.Forms.Padding(2);
+            this.display.Location = new System.Drawing.Point(16, 109);
             this.display.Name = "display";
-            this.display.Size = new System.Drawing.Size(303, 184);
+            this.display.Size = new System.Drawing.Size(454, 283);
             this.display.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
             this.display.TabIndex = 5;
             this.display.TabStop = false;
@@ -81,9 +78,10 @@
             this.portSelect.AutoCompleteSource = System.Windows.Forms.AutoCompleteSource.ListItems;
             this.portSelect.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.portSelect.FormattingEnabled = true;
-            this.portSelect.Location = new System.Drawing.Point(157, 15);
+            this.portSelect.Location = new System.Drawing.Point(236, 23);
+            this.portSelect.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.portSelect.Name = "portSelect";
-            this.portSelect.Size = new System.Drawing.Size(62, 21);
+            this.portSelect.Size = new System.Drawing.Size(91, 28);
             this.portSelect.Sorted = true;
             this.portSelect.TabIndex = 6;
             this.portSelect.SelectionChangeCommitted += new System.EventHandler(this.portSelect_SelectionChangeCommitted);
@@ -91,9 +89,10 @@
             // autoSelect
             // 
             this.autoSelect.AutoSize = true;
-            this.autoSelect.Location = new System.Drawing.Point(225, 17);
+            this.autoSelect.Location = new System.Drawing.Point(338, 26);
+            this.autoSelect.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.autoSelect.Name = "autoSelect";
-            this.autoSelect.Size = new System.Drawing.Size(89, 17);
+            this.autoSelect.Size = new System.Drawing.Size(132, 24);
             this.autoSelect.TabIndex = 7;
             this.autoSelect.Text = "Auto-Set Port";
             this.autoSelect.UseVisualStyleBackColor = true;
@@ -106,9 +105,10 @@
             this.indicatorPanel.Controls.Add(this.serialIndicator);
             this.indicatorPanel.Controls.Add(this.camIndicator);
             this.indicatorPanel.Controls.Add(this.youtubeIndicator);
-            this.indicatorPanel.Location = new System.Drawing.Point(11, 40);
+            this.indicatorPanel.Location = new System.Drawing.Point(16, 62);
+            this.indicatorPanel.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.indicatorPanel.Name = "indicatorPanel";
-            this.indicatorPanel.Size = new System.Drawing.Size(303, 26);
+            this.indicatorPanel.Size = new System.Drawing.Size(452, 38);
             this.indicatorPanel.TabIndex = 8;
             // 
             // serialIndicator
@@ -116,9 +116,10 @@
             this.serialIndicator.AutoSize = true;
             this.serialIndicator.Enabled = false;
             this.serialIndicator.FlatAppearance.CheckedBackColor = System.Drawing.Color.Lime;
-            this.serialIndicator.Location = new System.Drawing.Point(207, 3);
+            this.serialIndicator.Location = new System.Drawing.Point(310, 5);
+            this.serialIndicator.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.serialIndicator.Name = "serialIndicator";
-            this.serialIndicator.Size = new System.Drawing.Size(74, 17);
+            this.serialIndicator.Size = new System.Drawing.Size(108, 24);
             this.serialIndicator.TabIndex = 2;
             this.serialIndicator.Text = "Serial Port";
             this.serialIndicator.UseVisualStyleBackColor = false;
@@ -128,9 +129,10 @@
             this.camIndicator.AutoSize = true;
             this.camIndicator.Enabled = false;
             this.camIndicator.FlatAppearance.CheckedBackColor = System.Drawing.Color.Lime;
-            this.camIndicator.Location = new System.Drawing.Point(108, 2);
+            this.camIndicator.Location = new System.Drawing.Point(162, 3);
+            this.camIndicator.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.camIndicator.Name = "camIndicator";
-            this.camIndicator.Size = new System.Drawing.Size(93, 17);
+            this.camIndicator.Size = new System.Drawing.Size(138, 24);
             this.camIndicator.TabIndex = 1;
             this.camIndicator.Text = "Camera Setup";
             this.camIndicator.UseVisualStyleBackColor = false;
@@ -140,9 +142,10 @@
             this.youtubeIndicator.AutoSize = true;
             this.youtubeIndicator.Enabled = false;
             this.youtubeIndicator.FlatAppearance.CheckedBackColor = System.Drawing.Color.Lime;
-            this.youtubeIndicator.Location = new System.Drawing.Point(3, 3);
+            this.youtubeIndicator.Location = new System.Drawing.Point(4, 5);
+            this.youtubeIndicator.Margin = new System.Windows.Forms.Padding(4, 5, 4, 5);
             this.youtubeIndicator.Name = "youtubeIndicator";
-            this.youtubeIndicator.Size = new System.Drawing.Size(99, 17);
+            this.youtubeIndicator.Size = new System.Drawing.Size(143, 24);
             this.youtubeIndicator.TabIndex = 0;
             this.youtubeIndicator.Text = "YouTube Login";
             this.youtubeIndicator.UseVisualStyleBackColor = false;
@@ -155,18 +158,18 @@
             // 
             // Form1
             // 
-            this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
+            this.AutoScaleDimensions = new System.Drawing.SizeF(9F, 20F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(325, 266);
+            this.ClientSize = new System.Drawing.Size(488, 409);
             this.Controls.Add(this.indicatorPanel);
             this.Controls.Add(this.autoSelect);
             this.Controls.Add(this.portSelect);
             this.Controls.Add(this.display);
             this.Controls.Add(this.btnCamSetup);
             this.Controls.Add(this.btnLogin);
-            this.Margin = new System.Windows.Forms.Padding(2);
             this.Name = "Form1";
             this.Text = "Form1";
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.Form1_FormClosing);
             ((System.ComponentModel.ISupportInitialize)(this.display)).EndInit();
             this.indicatorPanel.ResumeLayout(false);
             this.indicatorPanel.PerformLayout();

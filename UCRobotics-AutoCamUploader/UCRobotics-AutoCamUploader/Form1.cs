@@ -41,22 +41,36 @@ namespace UCRobotics_AutoCamUploader
 
         private void updatePortList()
         {
+
             var selected = portSelect.SelectedItem;
             var newList = SerialPort.GetPortNames();
-            if(newList.Where((item) => !portSelect.Items.Contains(item)).Count() != 0 || newList.Length != portSelect.Items.Count || !newList.Contains(selected))
+            if (newList.Length == 0)
             {
+                port = null;
                 portSelect.Items.Clear();
-                portSelect.Items.AddRange(newList);
-                if(selected?.GetType() == typeof(string) && newList.Contains(selected))
-                {
-                    portSelect.SelectedItem = selected;
-                }
-                else
-                {
-                    portSelect.SelectedIndex = 0;
-                }
+                portSelect.Enabled = false;
+                autoSelect.Enabled = false;
+                autoSelect.Checked = false;
             }
-            port = new SerialPort((string)portSelect.SelectedItem);
+            else
+            {
+                autoSelect.Enabled = true;
+
+                if (newList.Where((item) => !portSelect.Items.Contains(item)).Count() != 0 || newList.Length != portSelect.Items.Count || !newList.Contains(selected))
+                {
+                    portSelect.Items.Clear();
+                    portSelect.Items.AddRange(newList);
+                    if (selected?.GetType() == typeof(string) && newList.Contains(selected))
+                    {
+                        portSelect.SelectedItem = selected;
+                    }
+                    else
+                    {
+                        portSelect.SelectedIndex = 0;
+                    }
+                }
+                port = new SerialPort((string)portSelect.SelectedItem);
+            }
         }
 
         public async Task checkPort()
@@ -84,9 +98,13 @@ namespace UCRobotics_AutoCamUploader
                 port.Close();
                 validPort = true;
             }
-            catch(Exception)
+            catch (Exception)
             {
-                port.Close();
+                try
+                {
+                    port.Close();
+                }
+                catch { }
                 validPort = false;
                 return;
             }
@@ -97,7 +115,7 @@ namespace UCRobotics_AutoCamUploader
             serialIndicator.Checked = validPort;
             youtubeIndicator.Checked = youtubeService != null;
             camIndicator.Checked = device != null;
-            if(serialIndicator.Checked && youtubeIndicator.Checked && camIndicator.Checked)
+            if (serialIndicator.Checked && youtubeIndicator.Checked && camIndicator.Checked)
             {
                 indicatorPanel.BackColor = Color.Green;
             }
@@ -125,7 +143,7 @@ namespace UCRobotics_AutoCamUploader
             updateReady();
         }
 
-        private void btnUpload_Click(object sender, EventArgs e)
+        private void StartRec()
         {
             FileWriter.Open("Test.mp4", device.VideoResolution.FrameSize.Width, device.VideoResolution.FrameSize.Height);
             recording = true;
@@ -137,10 +155,17 @@ namespace UCRobotics_AutoCamUploader
             {
                 FileWriter.WriteVideoFrame(eventArgs.Frame);
             }
-            display.Image = new Bitmap(eventArgs.Frame);
+            Image newImage = new Bitmap(eventArgs.Frame);
+            try
+            {
+                Image temp = display.Image;
+                display.Image = newImage;
+                temp.Dispose();
+            }
+            catch { }
         }
 
-        private async void btnStop_Click(object sender, EventArgs e)
+        private async void StopRec()
         {
             recording = false;
             await Task.Delay(500);
@@ -166,6 +191,11 @@ namespace UCRobotics_AutoCamUploader
 
         private void btnCamSetup_Click(object sender, EventArgs e)
         {
+            if (device != null)
+            {
+                device.Stop();
+                device.NewFrame -= Device_NewFrame;
+            }
             VideoCaptureDeviceForm dialog = new VideoCaptureDeviceForm();
             DialogResult res = dialog.ShowDialog();
             if (res != DialogResult.OK)
@@ -186,12 +216,13 @@ namespace UCRobotics_AutoCamUploader
         private async void refreshPortsTimer_Tick(object sender, EventArgs e)
         {
             refreshPortsTimer.Enabled = false;
-            
+
+            portSelect.Enabled = !autoSelect.Checked;
             updatePortList();
             await checkPort();
-            if(autoSelect.Checked && !validPort)
+            if (autoSelect.Checked && !validPort)
             {
-                if(portSelect.SelectedIndex == portSelect.Items.Count - 1)
+                if (portSelect.SelectedIndex == portSelect.Items.Count - 1)
                 {
                     portSelect.SelectedIndex = 0;
                 }
@@ -200,15 +231,57 @@ namespace UCRobotics_AutoCamUploader
                     portSelect.SelectedIndex += 1;
                 }
             }
+            if(validPort)
+            {
+                port.Open();
+                port.WriteTimeout = 100;
+                port.ReadTimeout = 100;
+                port.WriteLine("status");
+                var res = port.ReadLine();
+                port.Close();
+                if(res == "rec")
+                {
+                    if(!recording)
+                    {
+                        StartRec();   
+                    }
+                }
+                else if(recording)
+                {
+                    StopRec();
+                }
+
+            }
+            else
+            {
+                if(recording)
+                {
+                    StopRec();
+                }
+            }
 
             updateReady();
             refreshPortsTimer.Enabled = true;
         }
-        
+
 
         private void portSelect_SelectionChangeCommitted(object sender, EventArgs e)
         {
             port = new SerialPort((string)portSelect.SelectedItem);
+        }
+
+        private void Form1_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            if(port != null)
+            {
+            port.Dispose();
+
+            }
+            port = null;
+            device = null;
+            if (youtubeService != null)
+            youtubeService.Dispose();
+            youtubeService = null;
         }
     }
 }
